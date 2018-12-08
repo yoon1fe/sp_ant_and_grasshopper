@@ -42,16 +42,16 @@ void main(int ac, char *av[]){
 	sockNum = sock_id + 1;
 
 	FD_ZERO(&read_set);
-	FD_SET(sock_id,&read_set);	
 	while(1){
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 1000;
 		if(num_clnt>0)
 			sockNum = clntsock[num_clnt-1]+1;
+		FD_SET(sock_id,&read_set);
+
 		for(i=0; i<num_clnt; i++)
 			FD_SET(clntsock[i],&read_set);
-		printf("before select\n");
-		if(select(sockNum,&read_set,NULL,NULL,NULL)<0){
+		if(select(sockNum,&read_set,(fd_set*)0,(fd_set*)0,(struct timeval*)0)<0){	
 			printf("select error\n");
 			exit(1);
 		}
@@ -61,27 +61,27 @@ void main(int ac, char *av[]){
 			if(clntfd != -1){
 				clntsock[num_clnt] = clntfd;
 				num_clnt++;
+				write(clntfd,welcome,strlen(welcome));
 				printf("%d clnt join\n",num_clnt);
 			}
 		}
 		for(i = 0; i<num_clnt; i++){
-			if(FD_ISSET(clntsock[i],&read_set)>0){
+			if(FD_ISSET(clntsock[i],&read_set)){
 
-				if((strLen=recv(clntsock[i],buf,strlen(buf),0))> 0){
+				if((strLen=read(clntsock[i],buf,BUFSIZE))> 0){
 					buf[strLen] = '\0';
-					printf("%s\n",buf);
 				}
 				else{
-					shutdown(clntsock[i],2);
-					if( i != num_clnt -1){
+					printf("shutdown\n");
+					close(clntsock[i]);
+					if( i != num_clnt -1)
 						clntsock[i] = clntsock[num_clnt - 1];
-						num_clnt--;
-						continue;
-					}
+					num_clnt--;
+					continue;
+					
 				}
 				for(j=0;j<num_clnt;j++){
-					send(clntsock[j],buf,strlen(buf),0);
-					printf("%d send\n",j);
+					write(clntsock[j],buf,strlen(buf));
 				}
 			}
 		}
