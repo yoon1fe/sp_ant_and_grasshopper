@@ -15,7 +15,7 @@ void errorHandling(char* msg);
 void readRoutine(int sock, char* buf);
 void writeRoutine(int sock, char* buf, char* myname);
 
-int main(int argc, char* argv[])
+int main(int ac, char* av[])
 {
 	int sock;
 	pid_t pid;
@@ -24,17 +24,13 @@ int main(int argc, char* argv[])
 	struct sockaddr_in servAddr;
 	struct hostent *hp;
 
-	if( argc != 3 )
-
+	if( ac != 3 )
 	{
-
-		printf("Usage:%s <ip><port>\n", argv[0]);
-
+		printf("Usage:%s <ip><port>\n", av[0]);
 		exit(1);
-
 	}
 
-	sock = socket(PF_INET, SOCK_STREAM, 0);
+	/*sock = socket(PF_INET, SOCK_STREAM, 0);
 
 	bzero(&servAddr,sizeof(servAddr));
 	hp = gethostbyname(argv[1]);
@@ -43,11 +39,9 @@ int main(int argc, char* argv[])
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = htons(atoi(argv[2]));
 
-	   
+	connect(sock, (struct sockaddr*)&servAddr, sizeof(servAddr))*/
 
-	if( connect(sock, (struct sockaddr*)&servAddr, sizeof(servAddr)) == -1 )
-
-		errorHandling("connect() error");
+	sock = connect_to_server(av[1],atoi(av[2]));
 
 	printf("NAME : ");
 	scanf("%s",myname);
@@ -55,61 +49,29 @@ int main(int argc, char* argv[])
 	pid = fork();
 
 	if( pid == 0 )
-
 		writeRoutine(sock, buf,myname);
 
 	else
-
 		readRoutine(sock, buf);
 
-	   
+	while(wait(0)!=0);
 
 	close(sock);
 
 	return 0;
 
-	   
-
-	return 0;
-
 }
-
-   
-
-void errorHandling(char* msg)
-
-{
-
-	fputs(msg, stderr);
-
-	fputc('\n', stderr);
-
-	exit(1);
-
-}
-
 void readRoutine(int sock, char* buf)
-
 {
-
 	while(1)
-
 	{
-
 		int strLen = read(sock, buf, BUFSIZE);
-
 		if( strLen == 0 )
-
 			return ;
 
-		   
-
 		buf[strLen] = 0;
-
 		printf("%s", buf);
-
 	}
-
 }
 
 void writeRoutine(int sock, char* buf,char* myname)
@@ -118,17 +80,11 @@ void writeRoutine(int sock, char* buf,char* myname)
 	while(1)
 
 	{
-
 		fgets(buf, BUFSIZE, stdin);
-		
 		if( !strcmp(buf, "q\n") || !strcmp(buf, "Q\n") )
-
 		{
-
 			shutdown(sock, SHUT_WR);
-
 			return;
-
 		}
 		sprintf(msg,"[%s] %s",myname,buf);
 		write(sock, msg, strlen(msg));

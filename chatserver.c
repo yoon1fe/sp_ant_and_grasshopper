@@ -16,10 +16,9 @@ void main(int ac, char *av[]){
 	int sock_id, sockNum, clntsock[MAX],clntfd;
 	char hostname[256];
 	fd_set read_set;
-	char buf[BUFSIZE],welcome[BUFSIZE] = "WELCOME!\n";
+	char buf[BUFSIZE],welcome[BUFSIZE] = "WELCOME!";
 	int i,j,num_clnt = 0;
 	int strLen,clntsLen;
-	struct timeval timeout;
 
 /*	if((sock_id = socket(PF_INET, SOCK_STREAM,0))== -1)
 			exit(1);
@@ -43,10 +42,11 @@ void main(int ac, char *av[]){
 
 	FD_ZERO(&read_set);
 	while(1){
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 1000;
 		if(num_clnt>0)
 			sockNum = clntsock[num_clnt-1]+1;
+		else if(num_clnt == 0)
+			sockNum = sock_id+1;
+
 		FD_SET(sock_id,&read_set);
 
 		for(i=0; i<num_clnt; i++)
@@ -61,8 +61,8 @@ void main(int ac, char *av[]){
 			if(clntfd != -1){
 				clntsock[num_clnt] = clntfd;
 				num_clnt++;
-				write(clntfd,welcome,strlen(welcome));
-				printf("%d clnt join\n",num_clnt);
+				//write(clntfd,welcome,strlen(welcome));
+				printf("number of user : %d\n",num_clnt);
 			}
 		}
 		for(i = 0; i<num_clnt; i++){
@@ -72,13 +72,12 @@ void main(int ac, char *av[]){
 					buf[strLen] = '\0';
 				}
 				else{
-					printf("shutdown\n");
+					printf("number of user : %d\n",i);
 					close(clntsock[i]);
 					if( i != num_clnt -1)
 						clntsock[i] = clntsock[num_clnt - 1];
 					num_clnt--;
 					continue;
-					
 				}
 				for(j=0;j<num_clnt;j++){
 					write(clntsock[j],buf,strlen(buf));
