@@ -66,7 +66,7 @@ void main(int ac, char *av[]){
 				clntsock[num_clnt] = clntfd;
 				strLen=read(clntfd,name[num_clnt],10);
 				name[num_clnt][strLen-1]='\0';
-				num_clnt++;
+				printf("%s connect\n",name[num_clnt++]);
 				printf("number of user : %d\n",num_clnt);
 			}
 		}
@@ -74,6 +74,7 @@ void main(int ac, char *av[]){
 			if(FD_ISSET(clntsock[i],&read_set)){
 				if((strLen=read(clntsock[i],buf,BUFSIZE))<=0){
 					close(clntsock[i]);
+					printf("%s disconnect\n",name[i]);
 					if( i != num_clnt -1){
 						clntsock[i] = clntsock[num_clnt - 1];
 						strcpy(name[i],name[num_clnt -1]);
