@@ -44,7 +44,8 @@ int main(int ac, char* av[])
 	sock = connect_to_server(av[1],atoi(av[2]));
 
 	printf("NAME : ");
-	scanf("%s",myname);
+	fgets(myname,10,stdin);
+	write(sock,myname,strlen(myname));
 
 	pid = fork();
 
@@ -54,7 +55,6 @@ int main(int ac, char* av[])
 	else
 		readRoutine(sock, buf);
 
-	while(wait(0)!=0);
 
 	close(sock);
 
@@ -78,16 +78,15 @@ void writeRoutine(int sock, char* buf,char* myname)
 {
 	char msg[BUFSIZE];
 	while(1)
-
 	{
 		fgets(buf, BUFSIZE, stdin);
-		if( !strcmp(buf, "q\n") || !strcmp(buf, "Q\n") )
+		if( !strcmp(buf, "q\n") )
 		{
-			shutdown(sock, SHUT_WR);
+			printf("Good Bye\n");
+			shutdown(sock,SHUT_WR);
 			return;
 		}
-		sprintf(msg,"[%s] %s",myname,buf);
-		write(sock, msg, strlen(msg));
+		write(sock, buf, strlen(buf));
 
 	}
 }
