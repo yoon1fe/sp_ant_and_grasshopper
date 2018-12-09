@@ -42,7 +42,12 @@ int main(int ac, char* av[])
 	connect(sock, (struct sockaddr*)&servAddr, sizeof(servAddr))*/
 
 	sock = connect_to_server(av[1],atoi(av[2]));
+	pid= fork();
 
+	if(pid==0)
+		execlp("clear","clear",NULL);
+
+	sleep(1);
 	printf("NAME : ");
 	fgets(myname,10,stdin);
 	write(sock,myname,strlen(myname));
@@ -80,7 +85,7 @@ void writeRoutine(int sock, char* buf,char* myname)
 	while(1)
 	{
 		fgets(buf, BUFSIZE, stdin);
-		if( !strcmp(buf, "q\n") )
+		if( !strcmp(buf, "QUIT\n") )
 		{
 			printf("Good Bye\n");
 			shutdown(sock,SHUT_WR);
