@@ -47,7 +47,7 @@ int main(int ac, char* av[])
 	if(pid==0)
 		execlp("clear","clear",NULL);
 
-	sleep(1);
+	wait();
 	printf("NAME : ");
 	fgets(myname,10,stdin);
 	write(sock,myname,strlen(myname));
