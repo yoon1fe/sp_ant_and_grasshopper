@@ -16,12 +16,12 @@ int sock_id;
 void main(int ac,char *av[]){
 	pthread_t t1,t2;
 	struct sockaddr_in saddr;
-	char myname[20];
 	char buf[BUFSIZE];
 	fd_set read_set;
 	struct hostent *hp;
 	int strLen,i=0;
 	int c_y,c_x;
+	char myname[10];
 /*	if(ac != 3){
 		printf("usage: %s IPaddress PORTNUM\n",av[0]);
 		exit(1);
@@ -50,8 +50,7 @@ void main(int ac,char *av[]){
 	write(sock_id,myname,strlen(myname));
 
 	initscr();
-
-	pthread_create(&t1,NULL,interface,(void*)NULL);
+	pthread_create(&t1,NULL,interface,(void*)&myname);
 	while(1){
 		FD_ZERO(&read_set);
 		FD_SET(sock_id,&read_set);
@@ -90,8 +89,10 @@ void main(int ac,char *av[]){
 void *interface(void* a)
 {
 	char msg[BUFSIZE],c;
-	move(LINES-1,0);
+	
 	while(1){
+		msg[0] = '\0';
+		move(LINES-1,0);
 		getnstr(msg,BUFSIZE);
 		if(!strcmp(msg,"QUIT")){
 			endwin();

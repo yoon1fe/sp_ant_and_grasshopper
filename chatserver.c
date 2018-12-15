@@ -19,7 +19,7 @@ void main(int ac, char *av[]){
 	char buf[BUFSIZE];
 	int i,j,num_clnt = 0;
 	int strLen,clntsLen;
-	char name[MAX][10],msg[BUFSIZE];
+	char name[MAX][10],msg[BUFSIZE],welcome[BUFSIZE],name_exit[10];
 	int max = 0;
 
 /*	if((sock_id = socket(PF_INET, SOCK_STREAM,0))== -1)
@@ -66,8 +66,12 @@ void main(int ac, char *av[]){
 				clntsock[num_clnt] = clntfd;
 				strLen=read(clntfd,name[num_clnt],10);
 				name[num_clnt][strLen-1]='\0';
+				sprintf(welcome,"%30s joined\n",name[num_clnt]);
 				printf("%s connect\n",name[num_clnt++]);
 				printf("number of user : %d\n",num_clnt);
+				for(i=0;i<num_clnt;i++)
+					write(clntsock[i],welcome,strlen(welcome));
+
 			}
 		}
 		for(i = 0; i<num_clnt; i++){
@@ -75,19 +79,22 @@ void main(int ac, char *av[]){
 				if((strLen=read(clntsock[i],buf,BUFSIZE))<=0){
 					close(clntsock[i]);
 					printf("%s disconnect\n",name[i]);
+					strcpy(name_exit,name[i]);
 					if( i != num_clnt -1){
 						clntsock[i] = clntsock[num_clnt - 1];
 						strcpy(name[i],name[num_clnt -1]);
 					}
 					printf("number of user : %d\n",--num_clnt);
+					for(j=0;j<num_clnt;j++){
+						sprintf(msg,"%30s exit\n",name_exit);
+						write(clntsock[j],msg,strlen(msg));
+					}
 					continue;
 				}
 				buf[strLen] = '\0';
 				for(j=0;j<num_clnt;j++){
-					if(i!=j){
-						sprintf(msg,"[%s] %s",name[i],buf);
-						write(clntsock[j],msg,strlen(msg));
-					}
+					sprintf(msg,"[%s] %s",name[i],buf);
+					write(clntsock[j],msg,strlen(msg));
 				}
 			}
 		}
